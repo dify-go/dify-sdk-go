@@ -3,10 +3,13 @@ package dify
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"net/http"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type API struct {
 	c      *Client

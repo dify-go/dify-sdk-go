@@ -1,7 +1,6 @@
 package dify
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -14,7 +13,7 @@ type Client struct {
 }
 
 func NewClientWithConfig(c *ClientConfig) *Client {
-	var httpClient = &http.Client{}
+	httpClient := &http.Client{}
 
 	if c.Timeout != 0 {
 		httpClient.Timeout = c.Timeout
@@ -73,7 +72,7 @@ func (c *Client) sendJSONRequest(req *http.Request, res interface{}) error {
 }
 
 func (c *Client) getHost() string {
-	var host = strings.TrimSuffix(c.host, "/")
+	host := strings.TrimSuffix(c.host, "/")
 	return host
 }
 

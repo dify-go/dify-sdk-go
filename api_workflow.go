@@ -3,7 +3,6 @@ package dify
 import (
 	"bufio"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"

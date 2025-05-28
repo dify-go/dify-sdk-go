@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
-	"sync"
-
-	"github.com/KevinZhao/dify-sdk-go"
+	"github.com/dify-go/dify-sdk-go"
 )
 
 var (
@@ -19,11 +18,11 @@ var (
 )
 
 func TestApi3(t *testing.T) {
-	var c = &dify.ClientConfig{
+	c := &dify.ClientConfig{
 		Host:         host,
 		ApiSecretKey: apiSecretKey,
 	}
-	var client = dify.NewClientWithConfig(c)
+	client := dify.NewClientWithConfig(c)
 
 	ctx := context.Background()
 
@@ -53,9 +52,18 @@ func TestApi3(t *testing.T) {
 			if !isOpen {
 				goto done
 			}
-			strBuilder.WriteString(r.Answer)
-			cId = r.ConversationID
-			log.Println("Answer2", r.Answer, r.ConversationID, cId, r.ID, r.TaskID)
+
+			if r.Err != nil {
+				t.Fatal(r.Err.Error())
+				return
+			}
+
+			if r.Event == "message" {
+				data := r.Data.(*dify.ChatStreamMessageData)
+				strBuilder.WriteString(data.Answer)
+				cId = data.ConversationID
+				log.Println("Answer2", data.Answer, data.ConversationID, cId, data.MessageID, data.TaskID)
+			}
 		}
 	}
 
@@ -65,17 +73,17 @@ done:
 }
 
 func TestMessages(t *testing.T) {
-	var cId = "ec373942-2d17-4f11-89bb-f9bbf863ebcc"
+	cId := "ec373942-2d17-4f11-89bb-f9bbf863ebcc"
 	var err error
 	ctx := context.Background()
 
 	// messages
-	var messageReq = &dify.MessagesRequest{
+	messageReq := &dify.MessagesRequest{
 		ConversationID: cId,
 		User:           "jiuquan AI",
 	}
 
-	var client = dify.NewClient(host, apiSecretKey)
+	client := dify.NewClient(host, apiSecretKey)
 
 	var msg *dify.MessagesResponse
 	if msg, err = client.Api().Messages(ctx, messageReq); err != nil {
@@ -87,11 +95,11 @@ func TestMessages(t *testing.T) {
 }
 
 func TestMessagesFeedbacks(t *testing.T) {
-	var client = dify.NewClient(host, apiSecretKey)
+	client := dify.NewClient(host, apiSecretKey)
 	var err error
 	ctx := context.Background()
 
-	var id = "72d3dc0f-a6d5-4b5e-8510-bec0611a6048"
+	id := "72d3dc0f-a6d5-4b5e-8510-bec0611a6048"
 
 	var res *dify.MessagesFeedbacksResponse
 	if res, err = client.Api().MessagesFeedbacks(ctx, &dify.MessagesFeedbacksRequest{
@@ -108,7 +116,7 @@ func TestMessagesFeedbacks(t *testing.T) {
 }
 
 func TestConversations(t *testing.T) {
-	var client = dify.NewClient(host, apiSecretKey)
+	client := dify.NewClient(host, apiSecretKey)
 	var err error
 	ctx := context.Background()
 
@@ -125,7 +133,7 @@ func TestConversations(t *testing.T) {
 }
 
 func TestConversationsRename(t *testing.T) {
-	var client = dify.NewClient(host, apiSecretKey)
+	client := dify.NewClient(host, apiSecretKey)
 	var err error
 	ctx := context.Background()
 
@@ -144,7 +152,7 @@ func TestConversationsRename(t *testing.T) {
 }
 
 func TestParameters(t *testing.T) {
-	var client = dify.NewClient(host, apiSecretKey)
+	client := dify.NewClient(host, apiSecretKey)
 	var err error
 	ctx := context.Background()
 
@@ -162,7 +170,7 @@ func TestParameters(t *testing.T) {
 
 func TestRunWorkflow(t *testing.T) {
 	client := dify.NewClient(host, apiSecretKey)
-	//client := dify.NewClient("https://dify.zhaokm.org", "app-")
+	// client := dify.NewClient("https://dify.zhaokm.org", "app-")
 
 	// 测试带图片的工作流请求
 	workflowReq := dify.WorkflowRequest{
@@ -178,7 +186,6 @@ func TestRunWorkflow(t *testing.T) {
 	}
 
 	resp, err := client.API().RunWorkflow(context.Background(), workflowReq)
-
 	if err != nil {
 		t.Fatalf("RunWorkflow encountered an error: %v", err)
 	}
@@ -274,7 +281,6 @@ func TestRunWorkflowStreaming(t *testing.T) {
 	}
 
 	err := client.API().RunStreamWorkflowWithHandler(ctx, workflowReq, handler)
-
 	if err != nil {
 		t.Fatalf("RunStreamWorkflow encountered an error: %v", err)
 	}

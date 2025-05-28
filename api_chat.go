@@ -14,10 +14,15 @@ type ChatMessageRequest struct {
 }
 
 type ChatMessageResponse struct {
-	ID             string `json:"id"`
-	Answer         string `json:"answer"`
-	ConversationID string `json:"conversation_id"`
-	CreatedAt      int    `json:"created_at"`
+	Event          string         `json:"event"`
+	ID             string         `json:"id"`
+	MessageID      string         `json:"message_id"`
+	TaskID         string         `json:"task_id"`
+	Mode           string         `json:"mode"`
+	Answer         string         `json:"answer"`
+	ConversationID string         `json:"conversation_id"`
+	Metadata       map[string]any `json:"metadata"`
+	CreatedAt      int            `json:"created_at"`
 }
 
 /* Create chat message
